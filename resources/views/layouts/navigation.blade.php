@@ -16,6 +16,19 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                 </div>
+                <!-- Mostrar "Workspaces" solo si el usuario es admin -->
+                @if(auth()->user()->role === 'adm')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('workspace.index')" :active="request()->routeIs('workspace.index')">
+                            {{ __('Workspaces') }}
+                        </x-nav-link>
+                    </div>
+                @endif
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('booking.index')" :active="request()->routeIs('booking.index')">
+                        {{ __('Bookings') }}
+                    </x-nav-link>
+                </div>
             </div>
 
             <!-- Settings Dropdown -->
@@ -34,14 +47,8 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
