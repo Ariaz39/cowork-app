@@ -3,7 +3,6 @@
 @section('content')
     <div class="container mx-auto p-6">
 
-        <!-- Formulario para crear una nueva sala -->
         <div class="bg-white shadow-md rounded-lg p-6 mb-8">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Add New Workspace</h2>
             <form action="{{ route('workspace.store') }}" method="POST" class="space-y-4">
@@ -37,10 +36,9 @@
             </form>
         </div>
 
-        <!-- Listado de salas -->
         <div class="bg-white shadow-md rounded-lg p-6 mt-3">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Workspace List</h2>
-            <div class="overflow-x-auto"> <!-- Esto hace que la tabla sea responsiva -->
+            <div class="overflow-x-auto">
                 <table class="min-w-full bg-white border border-gray-300 rounded-lg">
                     <thead>
                     <tr class="bg-gray-100">

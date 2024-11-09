@@ -3,7 +3,6 @@
 @section('content')
     <div class="container mx-auto p-6">
 
-        <!-- Formulario para editar la sala -->
         <div class="bg-white shadow-md rounded-lg p-6 mb-8">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Edit Workspace</h2>
             <form action="{{ route('workspace.update', $workspace->id) }}" method="POST" class="space-y-4">

@@ -3,7 +3,6 @@
 @section('content')
     <h1>New Booking</h1>
 
-    <!-- Formulario para crear una nueva reserva -->
     <form action="{{ route('bookings.store') }}" method="POST">
         @csrf
         <label for="workspace_id">Workspace:</label>

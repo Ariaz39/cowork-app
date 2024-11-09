@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreBookingRequest;
+use App\Http\Requests\UpdateBookingRequest;
 use App\Models\Booking;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
@@ -9,60 +11,33 @@ use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
-    /**
-     * Muestra una lista de todas las reservas (para los administradores).
-     *
-     * @return \Illuminate\View\View
-     */
     public function index()
     {
-        // Recuperar todos los workspaces
         $workspaces = Workspace::all();
 
-        if(auth()->user()->role === 'adm') {
-            // Si el usuario es admin, mostrar todas las reservas
+        if (auth()->user()->role === 'adm') {
             $bookings = Booking::with('workspace', 'user')->get();
         } else {
-            // Si el usuario es regular, mostrar solo las reservas que le pertenecen
             $bookings = Booking::where('user_id', Auth::id())->with('workspace')->get();
         }
 
-        // Pasar las reservas y workspaces a la vista
         return view('bookings.index', compact('bookings', 'workspaces'));
     }
 
-
-    /**
-     * Muestra el formulario para crear una nueva reserva.
-     *
-     * @return \Illuminate\View\View
-     */
     public function create()
     {
         $workspaces = Workspace::all();
         return view('bookings.create', compact('workspaces'));
     }
 
-    /**
-     * Guarda una nueva reserva en la base de datos.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function store(Request $request)
+    public function store(StoreBookingRequest $request)
     {
-        $request->validate([
-            'workspace_id' => 'required|exists:workspaces,id',
-            'booking_date_time' => 'required|date|after:now',
-        ]);
-
-        // Verificar disponibilidad de la sala
         $existingBooking = Booking::where('workspace_id', $request->workspace_id)
             ->where('booking_date_time', $request->booking_date_time)
             ->exists();
 
         if ($existingBooking) {
-            return back()->withErrors(['booking_date_time' => 'This workspaces is already booked at the selected time.']);
+            return back()->withErrors(['booking_date_time' => 'This workspace is already booked at the selected time.']);
         }
 
         Booking::create([
@@ -76,67 +51,34 @@ class BookingController extends Controller
             ->with('success', 'Booking created successfully.');
     }
 
-    /**
-     * Muestra el formulario para editar el estado de una reserva (para administradores).
-     *
-     * @param  \App\Models\Booking  $booking
-     * @return \Illuminate\View\View
-     */
     public function edit(Booking $booking)
     {
-        $this->authorize('update', $booking); // Autorizar solo para administradores
+        $this->authorize('update', $booking);
         return view('bookings.edit', compact('booking'));
     }
 
-    /**
-     * Actualiza el estado de una reserva.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Booking  $booking
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(Request $request, Booking $booking)
+    public function update(UpdateBookingRequest $request, Booking $booking)
     {
-        $this->authorize('update', $booking); // Autorizar solo para administradores
+        $this->authorize('update', $booking);
 
-        $request->validate([
-            'status' => 'required|in:Pending,Accepted,Rejected',
-        ]);
-
-        $booking->update([
-            'status' => $request->status,
-        ]);
+        $booking->update($request->only('status'));
 
         return redirect()->route('booking.index')
-            ->with('success', 'Booking status updated successfully.');
+            ->with('success', 'Estado de la reserva actualizado exitosamente.');
     }
 
-    /**
-     * Muestra las reservas del usuario autenticado.
-     *
-     * @return \Illuminate\View\View
-     */
     public function myBookings()
     {
         $bookings = Booking::where('user_id', Auth::id())->with('workspaces')->get();
         return view('bookings.my_bookings', compact('bookings'));
     }
 
-    /**
-     * Actualiza el estado de una reserva.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $bookingId
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function updateStatus(Request $request, Booking $booking)
     {
-        // Validar el estado
         $request->validate([
             'status' => 'required|in:Pending,Accepted,Rejected',
         ]);
 
-        // Actualizar el estado de la reserva
         $booking->update([
             'status' => $request->status,
         ]);
